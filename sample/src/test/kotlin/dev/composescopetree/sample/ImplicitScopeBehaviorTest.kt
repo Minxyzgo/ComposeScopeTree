@@ -38,6 +38,28 @@ import java.util.concurrent.atomic.AtomicReference
 
 class ImplicitScopeBehaviorTest {
     @Test
+    fun filteredParentsStillRenderAndExposeSelectedDescendants() {
+        val host = ImplicitScopeTreeHost { site, name ->
+            "ImplicitScopeBehaviorTest.kt:" in site && name.endsWith(".ContentWrapper")
+        }
+        withScene(host) { scene, tree ->
+            val rendered = mutableListOf<String>()
+            scene.setContent {
+                tree.Content {
+                    Row {
+                        Box { ContentWrapper(label = "nested", report = rendered::add) {} }
+                    }
+                }
+            }
+            scene.render()
+            assertEquals(listOf("nested"), rendered)
+            val node = tree.roots.single()
+            assertTrue(node.function?.endsWith(".ContentWrapper") == true)
+            assertEquals("nested", node.arguments?.get("label"))
+        }
+    }
+
+    @Test
     fun untrackedCallsEvaluateArgumentsOnceAndCanContainAnImplicitTree() = withScene { scene, host ->
         val arguments = mutableListOf<String>()
         val rendered = mutableListOf<String>()
@@ -281,12 +303,15 @@ private class TestScene(private val scene: ImageComposeScene, private val failur
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
-private fun withScene(block: (TestScene, ImplicitScopeTreeHost) -> Unit): Unit = runBlocking {
+private fun withScene(
+    host: ImplicitScopeTreeHost = ImplicitScopeTreeHost(),
+    block: (TestScene, ImplicitScopeTreeHost) -> Unit,
+): Unit = runBlocking {
     val failure = AtomicReference<Throwable?>()
     val handler = CoroutineExceptionHandler { _, error -> failure.compareAndSet(null, error) }
     val scene = TestScene(ImageComposeScene(200, 200, coroutineContext = coroutineContext + handler), failure)
     try {
-        block(scene, ImplicitScopeTreeHost())
+        block(scene, host)
     } finally {
         scene.close()
     }

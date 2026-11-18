@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import dev.composescopetree.ImplicitDefinition
 import dev.composescopetree.ScopeComponent
 import dev.composescopetree.TrackImplicitDefinition
-import dev.composescopetree.isImplicitScopeTrackingEnabled
+import dev.composescopetree.shouldTrackImplicitScope
 
 public val BoxDefinition: ImplicitDefinition<BoxParameters, @Composable BoxScope.() -> Unit> =
     ImplicitDefinition(BoxComponent)
@@ -27,7 +27,7 @@ public fun implicitBox(
     content: @Composable BoxScope.() -> Unit,
     site: String,
 ) {
-    if (!isImplicitScopeTrackingEnabled()) {
+    if (!shouldTrackImplicitScope(site, "androidx.compose.foundation.layout.Box")) {
         Box(modifier, contentAlignment, propagateMinConstraints, content)
         return
     }
@@ -42,7 +42,7 @@ public fun implicitBox(
 /** Compiler entry point for the empty overload of Box. */
 @Composable
 public fun implicitEmptyBox(modifier: Modifier, site: String) {
-    if (!isImplicitScopeTrackingEnabled()) {
+    if (!shouldTrackImplicitScope(site, "androidx.compose.foundation.layout.Box")) {
         Box(modifier)
         return
     }
@@ -74,7 +74,7 @@ public fun implicitRow(
     content: @Composable RowScope.() -> Unit,
     site: String,
 ) {
-    if (!isImplicitScopeTrackingEnabled()) {
+    if (!shouldTrackImplicitScope(site, "androidx.compose.foundation.layout.Row")) {
         Row(modifier, horizontalArrangement, verticalAlignment, content)
         return
     }
@@ -107,7 +107,7 @@ public fun implicitColumn(
     content: @Composable ColumnScope.() -> Unit,
     site: String,
 ) {
-    if (!isImplicitScopeTrackingEnabled()) {
+    if (!shouldTrackImplicitScope(site, "androidx.compose.foundation.layout.Column")) {
         Column(modifier, verticalArrangement, horizontalAlignment, content)
         return
     }

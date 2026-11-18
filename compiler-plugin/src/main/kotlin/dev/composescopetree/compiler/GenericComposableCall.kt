@@ -52,11 +52,11 @@ internal class GenericComposableCall private constructor(
     private val tracker: IrSimpleFunctionSymbol,
     private val createArguments: IrSimpleFunctionSymbol,
     private val readArgument: IrSimpleFunctionSymbol,
-    private val isTrackingEnabled: IrSimpleFunctionSymbol,
+    private val shouldTrack: IrSimpleFunctionSymbol,
 ) {
     fun wrap(
         call: IrCall,
-        site: IrExpression,
+        site: String,
         name: String,
         scope: IrSymbol,
         parent: IrDeclarationParent,
@@ -145,7 +145,7 @@ internal class GenericComposableCall private constructor(
             continuation.body = continuationBuilder.irBlockBody { +irReturn(call) }
             val tracked = irCall(tracker, resultType).apply {
                 typeArguments[0] = resultType
-                arguments[0] = site
+                arguments[0] = irString(site)
                 arguments[1] = irString(name)
                 arguments[2] = irBoolean(resultType.isUnit())
                 arguments[3] = irCall(createArguments).apply {
@@ -158,7 +158,15 @@ internal class GenericComposableCall private constructor(
                     call.startOffset, call.endOffset, lambdaType, continuation, IrStatementOrigin.LAMBDA,
                 )
             }
-            +(if (direct == null) tracked else irIfThenElse(resultType, irCall(isTrackingEnabled), tracked, direct))
+            if (direct == null) {
+                +tracked
+            } else {
+                val selected = irCall(shouldTrack).apply {
+                    arguments[0] = irString(site)
+                    arguments[1] = irString(name)
+                }
+                +irIfThenElse(resultType, selected, tracked, direct)
+            }
         }
     }
 
@@ -202,7 +210,7 @@ internal class GenericComposableCall private constructor(
                 findFunction("TrackComposableCall") ?: return null,
                 findFunction("implicitCallArguments") ?: return null,
                 findFunction("implicitCallValue") ?: return null,
-                findFunction("isImplicitScopeTrackingEnabled") ?: return null,
+                findFunction("shouldTrackImplicitScope") ?: return null,
             )
         }
     }

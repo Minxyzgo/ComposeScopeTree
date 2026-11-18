@@ -40,6 +40,12 @@ private val LocalAddress = compositionLocalOf<ScopeAddress?> { null }
 @ReadOnlyComposable
 public fun isImplicitScopeTrackingEnabled(): Boolean = LocalHost.current != null
 
+/** Compiler fast path for a call outside the host's selection. */
+@Composable
+@ReadOnlyComposable
+public fun shouldTrackImplicitScope(site: String, function: String): Boolean =
+    LocalHost.current?.tracks(site, function) == true
+
 internal data class ImplicitEdit(
     val parameters: ((BoundComponent<*>) -> BoundComponent<*>)? = null,
     val definition: ImplicitScopeRenderer? = null,
@@ -64,7 +70,9 @@ internal class MountedScope(
 }
 
 /** Observes automatically instrumented calls in a normal UI composition. */
-public class ImplicitScopeTreeHost {
+public class ImplicitScopeTreeHost(
+    private val track: (site: String, function: String) -> Boolean = { _, _ -> true },
+) {
     @OptIn(ExperimentalAtomicApi::class)
     private val sequence = AtomicLong(0)
     private val mounted = mutableStateMapOf<ScopeAddress, MountedScope>()
@@ -87,6 +95,8 @@ public class ImplicitScopeTreeHost {
     }
 
     public val roots: List<ImplicitScopeNode> get() = rootSnapshots
+
+    internal fun tracks(site: String, function: String?): Boolean = function == null || track(site, function)
 
     @Composable
     public fun Content(content: @Composable () -> Unit) {
@@ -288,7 +298,7 @@ private fun <P : Any> rememberMountedScope(
     acceptsDefinition: Boolean,
     signature: ImplicitDefinition<*, *>?,
 ): MountedScope? {
-    val host = LocalHost.current ?: return null
+    val host = LocalHost.current?.takeIf { it.tracks(site, function) } ?: return null
     val parent = LocalAddress.current
     val declared = remember(component, parameters, signature) {
         BoundComponent(component, parameters)

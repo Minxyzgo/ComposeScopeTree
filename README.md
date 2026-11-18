@@ -7,11 +7,11 @@ separate tree. Both modes expose snapshots and per-instance editing.
 
 ## Maven Central
 
-Add `mavenCentral()` and use `io.github.rwpp-team:compose-scope-tree-compose-ui:0.1.0`
+Add `mavenCentral()` and use `io.github.rwpp-team:compose-scope-tree-compose-ui:0.1.1`
 for the Foundation adapters and runtime, or use
-`io.github.rwpp-team:compose-scope-tree-runtime:0.1.0` for the tree runtime alone.
+`io.github.rwpp-team:compose-scope-tree-runtime:0.1.1` for the tree runtime alone.
 Gradle selects the JVM or Android variant. Resolve
-`io.github.rwpp-team:compose-scope-tree-compiler-plugin:0.1.0` as a separate Kotlin
+`io.github.rwpp-team:compose-scope-tree-compiler-plugin:0.1.1` as a separate Kotlin
 compiler plugin in each instrumented module. The plugin uses Kotlin 2.4.20.
 The [Desktop sample](sample/build.gradle.kts) and
 [Android sample](android-sample/build.gradle.kts) show the compiler arguments.
@@ -59,7 +59,7 @@ You can run the sample from Android Studio or use
 `./gradlew -Pandroid :android-sample:installDebug` with a device or emulator
 connected. Tap **Expand box with a scope edit** to resize the observed box.
 
-In an Android app, add `implementation("io.github.rwpp-team:compose-scope-tree-compose-ui:0.1.0")` to get the
+In an Android app, add `implementation("io.github.rwpp-team:compose-scope-tree-compose-ui:0.1.1")` to get the
 Android variant and its runtime dependency. Add the compiler JAR to the
 Kotlin compiler arguments of each module whose call sites you want to discover.
 See [the Android sample build](android-sample/build.gradle.kts) for the
@@ -120,6 +120,9 @@ host.replaceDefinition(target, BoxDefinition) { parameters, content ->
 The compiler instruments Composable call sites, including calls to custom
 and library functions. Each mounted call reports its function name, source
 location, and instance address in `host.roots`; use that address for edits.
+Pass a `(site, function) -> Boolean` predicate to `ImplicitScopeTreeHost` to
+limit which calls enter the tree. Descendants that match the predicate are
+still observed when their enclosing calls are filtered out.
 Compose keys preserve an instance through keyed reorders. An unmounted
 instance loses its edits. A replacement can create a new composition for its
 children, in which case their instance addresses and edits are recreated.
@@ -261,7 +264,7 @@ for editing. For `remember` state in a declaration loop, put Compose's
 
 ## Edit a Box or swap its layout
 
-Add `implementation("io.github.rwpp-team:compose-scope-tree-compose-ui:0.1.0")`. In the host declaration, use
+Add `implementation("io.github.rwpp-team:compose-scope-tree-compose-ui:0.1.1")`. In the host declaration, use
 `ScopeBox` with the same layout arguments as `Box`. Declare nested scopes in
 its child block. Wrap ordinary Compose UI in a leaf's `ScopeContent(render = { … })`.
 

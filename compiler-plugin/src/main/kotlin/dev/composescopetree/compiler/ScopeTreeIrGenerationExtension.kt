@@ -93,7 +93,7 @@ class ScopeTreeIrGenerationExtension : IrGenerationExtension {
                 if (name.startsWith("androidx.compose.runtime.") || name in trackerEntrypoints) return expression
                 val scope = currentScope ?: return expression
                 val parent = currentDeclarationParent ?: return expression
-                return generic!!.wrap(expression, siteConstant(expression), name, scope.scope.scopeOwnerSymbol, parent)
+                return generic!!.wrap(expression, siteText(expression), name, scope.scope.scopeOwnerSymbol, parent)
             }
             if (expression.arguments.size + 1 != adapter.owner.parameters.size) return expression
             return IrCallImpl(
@@ -110,14 +110,18 @@ class ScopeTreeIrGenerationExtension : IrGenerationExtension {
             }
         }
 
-        private fun siteConstant(expression: IrCall): IrExpression {
+        private fun siteConstant(expression: IrCall): IrExpression = IrConstImpl.string(
+            expression.startOffset, expression.endOffset, stringType, siteText(expression),
+        )
+
+        private fun siteText(expression: IrCall): String {
             val fileEntry = file.fileEntry
             val rawName = fileEntry.name
             val baseName = rawName.substringAfterLast('/').substringAfterLast('\\')
             val packageName = file.packageFqName.asString()
             val line = fileEntry.getLineNumber(expression.startOffset) + 1
             val column = fileEntry.getColumnNumber(expression.startOffset) + 1
-            val value = buildString {
+            return buildString {
                 if (packageName.isNotEmpty()) {
                     append(packageName)
                     append('.')
@@ -129,12 +133,6 @@ class ScopeTreeIrGenerationExtension : IrGenerationExtension {
                 append(column)
             }
 
-            return IrConstImpl.string(
-                expression.startOffset,
-                expression.endOffset,
-                stringType,
-                value,
-            )
         }
     }
 }
@@ -146,6 +144,7 @@ private val trackerEntrypoints = setOf(
     "dev.composescopetree.TrackComposableCall",
     "dev.composescopetree.TrackImplicitScope",
     "dev.composescopetree.TrackImplicitDefinition",
+    "dev.composescopetree.shouldTrackImplicitScope",
     "dev.composescopetree.ScopeNode",
     "dev.composescopetree.RenderScopeTree",
     "dev.composescopetree.ScopeChildren.Render",
