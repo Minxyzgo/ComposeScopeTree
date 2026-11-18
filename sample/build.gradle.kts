@@ -24,12 +24,12 @@ val compilerPluginConfig = configurations.create("compilerPlugin") {
 }
 
 dependencies {
-    implementation(project(":runtime"))
-    implementation(project(":compose-ui"))
+    implementation(project(":compose-scope-tree-runtime"))
+    implementation(project(":compose-scope-tree-compose-ui"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-    compilerPluginConfig(project(path = ":compiler-plugin", configuration = "runtimeElements"))
+    compilerPluginConfig(project(path = ":compose-scope-tree-compiler-plugin", configuration = "runtimeElements"))
 }
 
 application {

@@ -31,9 +31,9 @@ val scopeTreeCompiler = configurations.create("scopeTreeCompiler") {
 }
 
 dependencies {
-    implementation(project(":compose-ui"))
+    implementation(project(":compose-scope-tree-compose-ui"))
     implementation("androidx.activity:activity-compose:1.13.0")
-    add(scopeTreeCompiler.name, project(path = ":compiler-plugin", configuration = "runtimeElements"))
+    add(scopeTreeCompiler.name, project(path = ":compose-scope-tree-compiler-plugin", configuration = "runtimeElements"))
 }
 
 tasks.withType<KotlinCompile>().configureEach {

@@ -14,8 +14,10 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "compose-scope-tree"
-include(":runtime")
-include(":compiler-plugin")
-include(":compose-ui")
+for (module in listOf("runtime", "compiler-plugin", "compose-ui")) {
+    val path = ":compose-scope-tree-$module"
+    include(path)
+    project(path).projectDir = file(module)
+}
 include(":sample")
 if (providers.gradleProperty("android").isPresent) include(":android-sample")

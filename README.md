@@ -5,6 +5,17 @@ of composition scopes. The K2 compiler plugin can discover calls in an
 existing UI, or assign source addresses to `ScopeNode` declarations in a
 separate tree. Both modes expose snapshots and per-instance editing.
 
+## Maven Central
+
+Add `mavenCentral()` and use `io.github.rwpp-team:compose-scope-tree-compose-ui:0.1.0`
+for the Foundation adapters and runtime, or use
+`io.github.rwpp-team:compose-scope-tree-runtime:0.1.0` for the tree runtime alone.
+Gradle selects the JVM or Android variant. Resolve
+`io.github.rwpp-team:compose-scope-tree-compiler-plugin:0.1.0` as a separate Kotlin
+compiler plugin in each instrumented module. The plugin uses Kotlin 2.4.20.
+The [Desktop sample](sample/build.gradle.kts) and
+[Android sample](android-sample/build.gradle.kts) show the compiler arguments.
+
 ## Modules
 
 - `runtime` — shared node declarations, typed components, tree editing and rendering.
@@ -41,14 +52,14 @@ or set `sdk.dir` in your local `local.properties`. The Android targets use AGP
 
 ```sh
 ./gradlew -Pandroid :android-sample:assembleDebug
-./gradlew -Pandroid :runtime:bundleAndroidMainAar :compose-ui:bundleAndroidMainAar
+./gradlew -Pandroid :compose-scope-tree-runtime:bundleAndroidMainAar :compose-scope-tree-compose-ui:bundleAndroidMainAar
 ```
 
 You can run the sample from Android Studio or use
 `./gradlew -Pandroid :android-sample:installDebug` with a device or emulator
 connected. Tap **Expand box with a scope edit** to resize the observed box.
 
-In an Android app, add `implementation(project(":compose-ui"))` to get the
+In an Android app, add `implementation("io.github.rwpp-team:compose-scope-tree-compose-ui:0.1.0")` to get the
 Android variant and its runtime dependency. Add the compiler JAR to the
 Kotlin compiler arguments of each module whose call sites you want to discover.
 See [the Android sample build](android-sample/build.gradle.kts) for the
@@ -71,9 +82,9 @@ setContent {
 
 ### Discover ordinary Compose calls
 
-For implicit scopes, depend on `:runtime` and configure the compiler plugin
+For implicit scopes, depend on the runtime and configure the compiler plugin
 as in the [Desktop sample](sample/build.gradle.kts) or
-[Android sample](android-sample/build.gradle.kts). Add `:compose-ui` to get
+[Android sample](android-sample/build.gradle.kts). Add the Compose UI adapters to get
 typed edits for `Box`, `Row`, and `Column`. Run the scope plugin before the Compose
 compiler:
 
@@ -250,7 +261,7 @@ for editing. For `remember` state in a declaration loop, put Compose's
 
 ## Edit a Box or swap its layout
 
-Add `implementation(project(":compose-ui"))`. In the host declaration, use
+Add `implementation("io.github.rwpp-team:compose-scope-tree-compose-ui:0.1.0")`. In the host declaration, use
 `ScopeBox` with the same layout arguments as `Box`. Declare nested scopes in
 its child block. Wrap ordinary Compose UI in a leaf's `ScopeContent(render = { … })`.
 

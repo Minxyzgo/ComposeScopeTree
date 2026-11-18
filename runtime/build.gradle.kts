@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.kotlin.plugin.compose")
+    `maven-publish`
 }
 
 val enableAndroid = providers.gradleProperty("android").isPresent
@@ -18,6 +19,7 @@ kotlin {
             namespace = "dev.composescopetree.runtime"
             compileSdk = 37
             minSdk = 26
+            withSourcesJar()
             compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
         }
     }
